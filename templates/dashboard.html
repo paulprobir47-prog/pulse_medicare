@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Pulse Medicare Dashboard</title>
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<style>
+:root {
+    color-scheme: light;
+    --bg: #eef3f8;
+    --surface: #ffffff;
+    --surface-alt: #f8fbff;
+    --text: #0f172a;
+    --muted: #475569;
+    --primary: #0f766e;
+    --primary-soft: #ccfbf1;
+    --sidebar: #064e47;
+    --sidebar-hover: #0d7666;
+    --border: rgba(15,23,42,0.08);
+    --shadow: 0 24px 80px rgba(15,23,42,0.08);
+}
+
+body.dark {
+    color-scheme: dark;
+    --bg: #0b1120;
+    --surface: #111827;
+    --surface-alt: #111b2d;
+    --text: #f8fafc;
+    --muted: #94a3b8;
+    --primary: #2dd4bf;
+    --primary-soft: rgba(45,212,191,0.18);
+    --sidebar: #071821;
+    --sidebar-hover: #10263c;
+    --border: rgba(148,163,184,0.22);
+    --shadow: 0 24px 80px rgba(0,0,0,0.44);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    min-height: 100vh;
+}
+
+button,
+input,
+textarea,
+select {
+    font: inherit;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 80px;
+    min-height: 100vh;
+    background: var(--sidebar);
+    position: fixed;
+    left: 0;
+    top: 0;
+    color: white;
+    overflow: hidden;
+    transition: width 0.25s ease;
+    border-right: 1px solid rgba(255,255,255,0.05);
+}
+
+.sidebar:hover {
+    width: 250px;
+}
+
+.logo {
+    text-align: center;
+    padding: 30px 25px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.logo i {
+    font-size: 64px;
+    margin-bottom: 12px;
+}
+
+.logo h2 {
+    margin-bottom: 6px;
+    font-size: 24px;
+    letter-spacing: 0.06em;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: opacity 0.25s ease, max-height 0.25s ease;
+}
+
+.logo p {
+    font-size: 14px;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: opacity 0.25s ease, max-height 0.25s ease;
+}
+
+.sidebar:hover .logo h2,
+.sidebar:hover .logo p {
+    opacity: 1;
+    max-height: 100px;
+}
+
+.sidebar ul li a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: white;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.sidebar:not(:hover) .logo{padding:18px 0;}
+.sidebar:not(:hover) .logo h2,
+.sidebar:not(:hover) .logo p{opacity:0;max-height:0;margin:0;padding:0;visibility:hidden;}
+.sidebar:not(:hover) .logo i{margin:0 auto;font-size:30px;}
+.sidebar:not(:hover) ul li a{
+    justify-content: center;
+    font-size: 0;
+    padding: 16px 0;
+}
+.sidebar:not(:hover) ul li a i {
+    font-size: 18px;
+}
+
+.sidebar-search {
+        margin: 18px 16px 8px;
+        position: relative;
+    }
+
+    .sidebar-search input {
+        width: 100%;
+        padding: 10px 12px 10px 38px;
+        border: 1px solid rgba(255,255,255,0.16);
+        border-radius: 999px;
+        background: rgba(255,255,255,0.12);
+        color: white;
+        outline: none;
+    }
+
+    .sidebar-search input::placeholder {
+        color: rgba(255,255,255,0.72);
+    }
+
+    .sidebar-search i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(255,255,255,0.74);
+    }
+
+    .sidebar-search-results {
+        display: none;
+        margin: 8px 16px 0;
+        border-radius: 14px;
+        background: rgba(255,255,255,0.12);
+        border: 1px solid rgba(255,255,255,0.12);
+        overflow: hidden;
+    }
+
+    .sidebar-search-results.show {
+        display: block;
+    }
+
+    .sidebar-search-result {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        color: white;
+        text-decoration: none;
+        font-size: 14px;
+    }
+
+    .sidebar-search-result:hover {
+        background: rgba(255,255,255,0.16);
+    }
+
+    .sidebar-search-hint {
+        margin: 6px 16px 0;
+        font-size: 12px;
+        color: rgba(255,255,255,0.72);
+    }
+
+    .sidebar ul {
+        list-style: none;
+        margin-top: 10px;
+}
+
+.sidebar ul li {
+    padding: 14px 25px;
+    transition: background 0.25s ease;
+}
+
+.sidebar ul li:hover {
+    background: var(--sidebar-hover);
+}
+
+.sidebar ul li a {
+    color: white;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 15px;
+}
+
+    .sidebar .menu-trigger {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+    }
+
+    .sidebar .menu-toggle {
+        flex: 1;
+    }
+
+    .sidebar .submenu-arrow {
+        background: transparent;
+        border: none;
+        color: white;
+        cursor: pointer;
+        padding: 2px 4px;
+    }
+
+    .sidebar ul li .submenu {
+        display: none;
+        list-style: none;
+        padding-left: 24px;
+        margin-top: 8px;
+    }
+
+    .sidebar ul li.open > .submenu {
+        display: block;
+    }
+
+/* Main */
+.main {
+    margin-left: 80px;
+    width: calc(100% - 80px);
+    min-height: 100vh;
+    padding-bottom: 40px;
+    transition: margin-left 0.25s ease, width 0.25s ease;
+}
+
+.sidebar:hover ~ .main {
+    margin-left: 250px;
+    width: calc(100% - 250px);
+}
+
+/* Topbar */
+.topbar {
+    height: 80px;
+    background: var(--surface);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 30px;
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.search {
+    position: relative;
+}
+
+.search input {
+    width: 320px;
+    padding: 12px 16px 12px 44px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    outline: none;
+    background: var(--surface-alt);
+    color: var(--text);
+}
+
+.search i {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+}
+
+.profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.profile i {
+    font-size: 32px;
+    color: var(--primary);
+}
+
+.theme-toggle {
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    border-radius: 999px;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.theme-toggle:hover {
+    transform: translateY(-1px);
+    background: var(--primary-soft);
+}
+.notification-btn {
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    border-radius: 999px;
+    padding: 10px 16px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.notification-btn:hover {
+    transform: translateY(-1px);
+    background: var(--primary-soft);
+}
+.notification-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: #ef4444;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+/* Cards */
+.collection-section {
+    padding: 24px;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.collection-card,
+.booking-card,
+.confirm-card,
+.cancel-card {
+    color: white;
+    padding: 24px 28px;
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+    min-width: 240px;
+    flex: 1;
+    max-width: 300px;
+}
+
+.collection-card {
+    background: linear-gradient(135deg, var(--primary), #0b8f84);
+}
+
+.booking-card {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+}
+
+.confirm-card {
+    background: linear-gradient(135deg, #22c55e, #15803d);
+}
+
+.cancel-card {
+    background: linear-gradient(135deg, #ef4444, #b91c1c);
+}
+
+.collection-header,
+.booking-header,
+.confirm-header,
+.cancel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.collection-label,
+.booking-label,
+.confirm-label,
+.cancel-label {
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    opacity: 0.9;
+    margin-bottom: 8px;
+}
+
+.collection-amount,
+.booking-count,
+.confirm-count,
+.cancel-count {
+    font-size: 32px;
+    font-weight: 700;
+}
+
+.view-report,
+.new-booking,
+.confirm-link,
+.cancel-link {
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    padding-top: 4px;
+}
+
+.view-report:hover,
+.new-booking:hover,
+.confirm-link:hover,
+.cancel-link:hover {
+    text-decoration: underline;
+}
+
+.dashboard-content-grid {
+    display: flex;
+    gap: 20px;
+    align-items: stretch;
+    margin: 24px 24px 24px 0;
+    flex-wrap: wrap;
+}
+
+.payment-due-section {
+    padding: 24px;
+    background: linear-gradient(135deg, var(--primary-soft), var(--surface));
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(15,118,110,0.16);
+    max-width: 760px;
+    width: 100%;
+    flex: 1 1 520px;
+    display: flex;
+    flex-direction: column;
+}
+
+.sales-chart-section {
+    padding: 24px;
+    background: var(--surface);
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    min-width: 280px;
+    flex: 0 1 360px;
+    display: flex;
+    flex-direction: column;
+}
+
+.sales-chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.sales-chip {
+    background: linear-gradient(135deg, var(--primary), #22c55e);
+    color: white;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.sales-chart-card {
+    background: linear-gradient(135deg, rgba(15,118,110,0.08), rgba(34,197,94,0.12));
+    border-radius: 18px;
+    padding: 14px;
+}
+
+.sales-chart-card svg {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.sales-chart-legend {
+    display: flex;
+    gap: 16px;
+    margin-top: 12px;
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+
+.sales-chart-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.sales-chart-legend i {
+    font-size: 0.7rem;
+}
+
+.payment-due-header,
+.collection-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+}
+
+.section-eyebrow {
+    color: var(--primary);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+
+.payment-due-title {
+    margin: 0;
+    font-size: 1.25rem;
+    color: var(--text);
+}
+
+.period-filter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.period-dropdown {
+    position: relative;
+}
+
+.period-toggle {
+    border: 1px solid rgba(15,118,110,0.2);
+    background: white;
+    color: #111827;
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-weight: 600;
+    outline: none;
+    min-width: 160px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+
+body.dark .period-toggle {
+    background: #0f172a;
+    color: #f8fafc;
+    border-color: rgba(45,212,191,0.35);
+}
+
+.period-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    background: white;
+    border: 1px solid rgba(15,118,110,0.2);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    min-width: 100%;
+    display: none;
+    z-index: 30;
+    overflow: hidden;
+}
+
+body.dark .period-menu {
+    background: #111827;
+    border-color: rgba(45,212,191,0.35);
+}
+
+.period-menu.show {
+    display: block;
+}
+
+.period-option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 10px 12px;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    cursor: pointer;
+}
+
+.period-option:hover,
+.period-option.active {
+    background: var(--primary-soft);
+}
+
+.collection-list-section {
+    padding: 24px;
+    background: linear-gradient(135deg, rgba(15,118,110,0.08), var(--surface));
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(15,118,110,0.16);
+    width: 100%;
+    max-width: 100%;
+    margin-top: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.collection-list-table {
+    padding: 0;
+    overflow: hidden;
+}
+
+.payment-due-table {
+    padding: 0;
+    overflow: hidden;
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px;
+    padding: 25px;
+}
+
+.card {
+    background: var(--surface);
+    padding: 28px;
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+    transition: transform 0.25s ease, border-color 0.25s ease;
+    border: 1px solid transparent;
+    cursor: pointer;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary-soft);
+}
+
+.card i {
+    font-size: 40px;
+    color: var(--primary);
+}
+
+.card h2 {
+    margin-top: 18px;
+    font-size: 32px;
+}
+
+.card p {
+    margin-top: 10px;
+    color: var(--muted);
+}
+
+.panel {
+    background: var(--surface);
+    padding: 25px;
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+}
+
+.panel-title {
+    color: var(--primary);
+    margin-bottom: 14px;
+}
+
+.action-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.action-card {
+    background: var(--surface);
+    border-radius: 22px;
+    padding: 28px 24px;
+    box-shadow: var(--shadow);
+    border: 1px solid transparent;
+    color: var(--text);
+    text-align: center;
+    transition: transform 0.25s ease, border-color 0.25s ease;
+}
+
+.action-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--primary-soft);
+}
+
+.action-card i {
+    color: var(--primary);
+    font-size: 26px;
+    margin-bottom: 14px;
+}
+
+.action-card h3 {
+    margin-top: 0;
+    font-size: 18px;
+}
+
+.table-box {
+    background: var(--surface);
+    padding: 25px;
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    overflow-x: auto;
+}
+
+.table-box table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table-box th,
+.table-box td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    color: var(--text);
+}
+
+.table-box th {
+    background: var(--primary);
+    color: white;
+    font-weight: 600;
+}
+
+.table-box tr:last-child td {
+    border-bottom: none;
+}
+
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.status-completed {
+    background: #ecfdf5;
+    color: #166534;
+}
+
+.status-pending {
+    background: #ffedd5;
+    color: #b45309;
+}
+
+.status-confirmed {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.footer {
+    margin-top: 30px;
+    padding: 20px;
+    text-align: center;
+    color: var(--muted);
+}
+
+@media(max-width:1000px) {
+    .cards,
+    .action-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .dashboard-content-grid {
+        margin-right: 24px;
+    }
+}
+
+@media(max-width:700px) {
+    .sidebar {
+        width: 80px;
+    }
+
+    .logo h2,
+    .logo p {
+        display: none;
+    }
+
+    .sidebar ul li {
+        padding: 14px 18px;
+    }
+
+    .sidebar ul li a {
+        font-size: 0;
+    }
+
+    .sidebar ul li i {
+        font-size: 22px;
+        width: auto;
+    }
+
+    .main {
+        margin-left: 80px;
+        width: calc(100% - 80px);
+    }
+
+    .search input {
+        width: 180px;
+    }
+
+    .cards,
+    .action-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="sidebar">
+    <div class="logo">
+        <i class="fa-solid fa-heart-pulse"></i>
+        <h2>Pulse</h2>
+        <p>Medicare HMS</p>
+    </div>
+    <div class="sidebar-search">
+        <i class="fa fa-search"></i>
+        <input type="text" id="sidebarSearchInput" placeholder="Search menu..." aria-label="Search sidebar menu">
+    </div>
+    <div id="sidebarSearchResults" class="sidebar-search-results" aria-live="polite"></div>
+    <div id="sidebarSearchHint" class="sidebar-search-hint">Type to filter menu items</div>
+    <ul>
+        <li><a href="{{ url_for('dashboard') }}" class="sidebar-link" data-search-text="dashboard home"><i class="fa fa-house"></i> Dashboard</a></li>
+        <li><a href="{{ url_for('patients') }}" class="sidebar-link" data-search-text="patients"><i class="fa fa-user"></i> Patients</a></li>
+        <li><a href="/doctors" class="sidebar-link" data-search-text="doctors"><i class="fa fa-user-doctor"></i> Doctors</a></li>
+        <li><a href="/appointments" class="sidebar-link" data-search-text="appointments"><i class="fa fa-calendar-check"></i> Appointments</a></li>
+        <li><a href="/pharmacy" class="sidebar-link" data-search-text="pharmacy"><i class="fa fa-pills"></i> Pharmacy</a></li>
+        <li><a href="/laboratory" class="sidebar-link" data-search-text="laboratory"><i class="fa fa-flask"></i> Laboratory</a></li>
+        <li><a href="/billing" class="sidebar-link" data-search-text="billing"><i class="fa fa-file-invoice"></i> Billing</a></li>
+        <li><a href="/reports" class="sidebar-link" data-search-text="reports"><i class="fa fa-chart-line"></i> Reports</a></li>
+        <li class="admin-menu">
+            <div class="menu-trigger">
+                <a href="#" class="menu-toggle sidebar-link" data-menu="admin" data-search-text="admin users management" data-result-href="{{ url_for('admin_users') }}"><i class="fa fa-shield-halved"></i> Admin</a>
+                <button type="button" class="submenu-arrow" data-menu="admin" aria-label="Toggle Admin menu"><i class="fa fa-chevron-down"></i></button>
+            </div>
+            <ul class="submenu">
+                <li><a href="{{ url_for('admin_users') }}" class="sidebar-link" data-search-text="admin user management"><i class="fa fa-users"></i> User</a></li>
+            </ul>
+        </li>
+        <li class="settings-menu">
+            <div class="menu-trigger">
+                <a href="#" class="menu-toggle sidebar-link" data-menu="settings" data-search-text="settings configuration" data-result-href="{{ url_for('settings') }}"><i class="fa fa-gear"></i> Settings</a>
+                <button type="button" class="submenu-arrow" data-menu="settings" aria-label="Toggle Settings menu"><i class="fa fa-chevron-down"></i></button>
+            </div>
+            <ul class="submenu">
+                <li><a href="{{ url_for('settings') }}" class="sidebar-link" data-search-text="settings"><i class="fa fa-gear"></i> Settings</a></li>
+            </ul>
+        </li>
+        <li><a href="{{ url_for('logout') }}" class="sidebar-link" data-search-text="logout sign out"><i class="fa fa-right-from-bracket"></i> Logout</a></li>
+    </ul>
+</div>
+
+<!-- Main -->
+
+<div class="main">
+
+<div class="topbar">
+
+<div class="search">
+
+<i class="fa fa-search"></i>
+
+<form action="{{ url_for('patients') }}" method="get" style="display:flex;align-items:center;gap:8px;">
+    <input
+        type="text"
+        name="q"
+        placeholder="Search patients, doctors..."
+        aria-label="Search patients"
+    >
+    <button type="submit" style="border:none;background:transparent;color:var(--text);cursor:pointer;font-size:1rem;">
+        Search
+    </button>
+</form>
+
+</div>
+
+<div style="display:flex;align-items:center;gap:14px;">
+<button type="button" id="themeToggle" class="theme-toggle">
+<i class="fa fa-moon"></i>
+Dark
+</button>
+<button type="button" class="notification-btn"><i class="fa fa-bell"></i><span class="notification-badge">3</span></button>
+
+<a href="/profile" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text);">
+<div class="profile" style="cursor:pointer;display:flex;align-items:center;gap:10px;">
+{% if profile_photo %}
+<img src="/{{ profile_photo }}" alt="Profile" style="width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid var(--border);">
+{% else %}
+<i class="fa fa-user-circle" style="font-size:22px;"></i>
+{% endif %}
+<span>{{ display_name or username }}</span>
+</div>
+</a>
+</div>
+
+</div>
+
+<div class="collection-section">
+    <div class="collection-card">
+        <div class="collection-header">
+            <div>
+                <p class="collection-label">TODAY'S COLLECTION</p>
+                <h2 class="collection-amount">₹ {{ revenue }}</h2>
+            </div>
+            <a href="/reports" class="view-report">View Report</a>
+        </div>
+    </div>
+
+    <div class="booking-card">
+        <div class="booking-header">
+            <div>
+                <p class="booking-label">TODAY'S TOTAL BOOKINGS</p>
+                <h2 class="booking-count"><i class="fa fa-user-injured"></i> {{ today_bookings }}</h2>
+            </div>
+            <a href="/appointments" class="new-booking">New Booking</a>
+        </div>
+    </div>
+
+    <div class="confirm-card">
+        <div class="confirm-header">
+            <div>
+                <p class="confirm-label">TODAY'S CONFIRM BOOKINGS</p>
+                <h2 class="confirm-count"><i class="fa fa-check-circle"></i> {{ today_confirmed_bookings }}</h2>
+            </div>
+            <a href="/appointments" class="confirm-link">View</a>
+        </div>
+    </div>
+
+    <div class="cancel-card">
+        <div class="cancel-header">
+            <div>
+                <p class="cancel-label">TODAY'S CANCEL BOOKINGS</p>
+                <h2 class="cancel-count"><i class="fa fa-times-circle"></i> {{ today_cancelled_bookings }}</h2>
+            </div>
+            <a href="/appointments" class="cancel-link">View</a>
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-content-grid">
+    <section class="payment-due-section">
+        <div class="payment-due-header">
+            <div>
+                <p class="section-eyebrow">PAYMENT TRACKING</p>
+                <h3 class="payment-due-title">LIST PATIENT WISE PAYMENT IS DUE</h3>
+            </div>
+            <div class="period-filter">
+                <label for="paymentPeriod" style="margin-right:8px; font-weight:700; color:var(--text);">FILTER BY PERIOD:</label>
+                <div class="period-dropdown">
+                    <button type="button" class="period-toggle" id="periodToggle" aria-haspopup="listbox" aria-expanded="false">
+                        Today <i class="fa fa-chevron-down"></i>
+                    </button>
+                    <div class="period-menu" id="periodMenu" role="listbox">
+                        <button type="button" class="period-option active" data-value="Today">Today</button>
+                        <button type="button" class="period-option" data-value="Yesterday">Yesterday</button>
+                        <button type="button" class="period-option" data-value="Last 7 Days">Last 7 Days</button>
+                        <button type="button" class="period-option" data-value="Last 30 Days">Last 30 Days</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-box payment-due-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Patient Name</th>
+                        <th>Amount Due</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="4" style="text-align:center; color:var(--muted);">No payment dues found for this period.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="sales-chart-section">
+        <div class="sales-chart-header">
+            <div>
+                <p class="section-eyebrow">SALES TRACK</p>
+                <h3 class="payment-due-title">SALE TRACKING</h3>
+            </div>
+            <span class="sales-chip">+12.8%</span>
+        </div>
+
+        <div class="sales-chart-card">
+            <svg viewBox="0 0 320 180" role="img" aria-label="Sales tracking bar chart">
+                <rect x="28" y="95" width="36" height="55" rx="8" fill="#0f766e"></rect>
+                <rect x="92" y="70" width="36" height="80" rx="8" fill="#14b8a6"></rect>
+                <rect x="156" y="48" width="36" height="102" rx="8" fill="#22c55e"></rect>
+                <rect x="220" y="80" width="36" height="70" rx="8" fill="#0ea5e9"></rect>
+                <rect x="284" y="30" width="36" height="120" rx="8" fill="#3b82f6"></rect>
+                <line x1="20" y1="160" x2="320" y2="160" stroke="#cbd5e1" stroke-width="1"></line>
+            </svg>
+        </div>
+
+        <div class="sales-chart-legend">
+            <span><i class="fa fa-square" style="color:#0f766e"></i> Jan</span>
+            <span><i class="fa fa-square" style="color:#14b8a6"></i> Feb</span>
+            <span><i class="fa fa-square" style="color:#22c55e"></i> Mar</span>
+        </div>
+    </section>
+</div>
+
+<section class="collection-list-section">
+    <div class="collection-list-header">
+        <div>
+            <p class="section-eyebrow">COLLECTIONS</p>
+            <h3 class="payment-due-title">LIST OF COLLECTION</h3>
+        </div>
+        <div class="period-filter">
+            <label for="collectionPeriod" style="margin-right:8px; font-weight:700; color:var(--text);">FILTER BY PERIOD:</label>
+            <div class="period-dropdown">
+                <button type="button" class="period-toggle" id="collectionPeriodToggle" aria-haspopup="listbox" aria-expanded="false">
+                    Today <i class="fa fa-chevron-down"></i>
+                </button>
+                <div class="period-menu" id="collectionPeriodMenu" role="listbox">
+                    <button type="button" class="period-option active" data-value="Today">Today</button>
+                    <button type="button" class="period-option" data-value="Yesterday">Yesterday</button>
+                    <button type="button" class="period-option" data-value="Last 7 Days">Last 7 Days</button>
+                    <button type="button" class="period-option" data-value="Last 30 Days">Last 30 Days</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-box collection-list-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Patient Name</th>
+                    <th>Collection Amount</th>
+                    <th>Collected On</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="4" style="text-align:center; color:var(--muted);">No collection records found for this period.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<script>
+    document.querySelectorAll('.menu-toggle, .submenu-arrow').forEach((toggle) => {
+        toggle.addEventListener('click', (event) => {
+            event.preventDefault();
+            const parent = toggle.closest('li');
+            const isOpen = parent.classList.contains('open');
+            document.querySelectorAll('.admin-menu, .settings-menu').forEach((item) => {
+                if (item !== parent) {
+                    item.classList.remove('open');
+                }
+            });
+            if (!isOpen) {
+                parent.classList.add('open');
+            } else {
+                parent.classList.remove('open');
+            }
+        });
+    });
+
+    const sidebarSearchInput = document.getElementById('sidebarSearchInput');
+    const sidebarSearchResults = document.getElementById('sidebarSearchResults');
+    const sidebarSearchHint = document.getElementById('sidebarSearchHint');
+    const sidebarLinks = Array.from(document.querySelectorAll('.sidebar-link'));
+
+    function renderSidebarSearchResults(query) {
+        const term = query.trim().toLowerCase();
+        if (!term) {
+            sidebarSearchResults.innerHTML = '';
+            sidebarSearchResults.classList.remove('show');
+            sidebarSearchHint.textContent = 'Type to filter menu items';
+            return;
+        }
+
+        const matches = sidebarLinks.filter((link) => {
+            const text = (link.getAttribute('data-search-text') || link.textContent).toLowerCase();
+            return text.includes(term);
+        });
+
+        if (!matches.length) {
+            sidebarSearchResults.innerHTML = '<div class="sidebar-search-result">No matching menu items</div>';
+            sidebarSearchResults.classList.add('show');
+            sidebarSearchHint.textContent = 'No matching menu items';
+            return;
+        }
+
+        sidebarSearchResults.innerHTML = matches.map((link) => {
+            const label = link.textContent.trim();
+            const iconClass = link.querySelector('i') ? link.querySelector('i').className : 'fa fa-arrow-right';
+            const resultHref = link.getAttribute('data-result-href') || link.getAttribute('href');
+            return `<a class="sidebar-search-result" href="${resultHref}"><i class="${iconClass}"></i><span>${label}</span></a>`;
+        }).join('');
+        sidebarSearchResults.classList.add('show');
+        sidebarSearchHint.textContent = `${matches.length} menu item${matches.length === 1 ? '' : 's'} found`;
+    }
+
+    if (sidebarSearchInput) {
+        sidebarSearchInput.addEventListener('input', (event) => {
+            renderSidebarSearchResults(event.target.value);
+        });
+    }
+
+    const themeToggle = document.getElementById('themeToggle');
+    const body = document.body;
+    const storedTheme = localStorage.getItem('dashboardTheme');
+
+    function applyTheme(theme) {
+        if (theme === 'dark') {
+            body.classList.add('dark');
+            themeToggle.innerHTML = '<i class="fa fa-sun"></i> Light';
+        } else {
+            body.classList.remove('dark');
+            themeToggle.innerHTML = '<i class="fa fa-moon"></i> Dark';
+        }
+        localStorage.setItem('dashboardTheme', theme);
+    }
+
+    themeToggle.addEventListener('click', () => {
+        const nextTheme = body.classList.contains('dark') ? 'light' : 'dark';
+        applyTheme(nextTheme);
+    });
+
+    const periodToggle = document.getElementById('periodToggle');
+    const periodMenu = document.getElementById('periodMenu');
+    const periodOptions = document.querySelectorAll('.period-option');
+    const collectionPeriodToggle = document.getElementById('collectionPeriodToggle');
+    const collectionPeriodMenu = document.getElementById('collectionPeriodMenu');
+    const collectionPeriodOptions = document.querySelectorAll('#collectionPeriodMenu .period-option');
+
+    function closePeriodMenu(toggle, menu) {
+        if (menu) {
+            menu.classList.remove('show');
+            toggle.setAttribute('aria-expanded', 'false');
+        }
+    }
+
+    if (periodToggle && periodMenu) {
+        periodToggle.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const isOpen = periodMenu.classList.toggle('show');
+            periodToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        });
+
+        periodOptions.forEach((option) => {
+            option.addEventListener('click', () => {
+                document.querySelector('#periodMenu .period-option.active')?.classList.remove('active');
+                option.classList.add('active');
+                periodToggle.innerHTML = `${option.dataset.value} <i class="fa fa-chevron-down"></i>`;
+                closePeriodMenu(periodToggle, periodMenu);
+            });
+        });
+
+        document.addEventListener('click', (event) => {
+            if (!periodToggle.contains(event.target) && !periodMenu.contains(event.target)) {
+                closePeriodMenu(periodToggle, periodMenu);
+            }
+        });
+    }
+
+    if (collectionPeriodToggle && collectionPeriodMenu) {
+        collectionPeriodToggle.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const isOpen = collectionPeriodMenu.classList.toggle('show');
+            collectionPeriodToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        });
+
+        collectionPeriodOptions.forEach((option) => {
+            option.addEventListener('click', () => {
+                document.querySelector('#collectionPeriodMenu .period-option.active')?.classList.remove('active');
+                option.classList.add('active');
+                collectionPeriodToggle.innerHTML = `${option.dataset.value} <i class="fa fa-chevron-down"></i>`;
+                closePeriodMenu(collectionPeriodToggle, collectionPeriodMenu);
+            });
+        });
+
+        document.addEventListener('click', (event) => {
+            if (!collectionPeriodToggle.contains(event.target) && !collectionPeriodMenu.contains(event.target)) {
+                closePeriodMenu(collectionPeriodToggle, collectionPeriodMenu);
+            }
+        });
+    }
+
+    applyTheme(storedTheme === 'dark' ? 'dark' : 'light');
+</script>
+
+</div>
+
+</body>
+</html>

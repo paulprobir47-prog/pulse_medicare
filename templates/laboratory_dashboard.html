@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Laboratory Dashboard</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body{font-family:Arial,Helvetica,sans-serif;background:#f4f6f9;color:#0f172a;margin:0;padding:20px}
+.container{max-width:1100px;margin:0 auto}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card{background:#fff;padding:18px;border-radius:10px;border:1px solid #ececec}
+.card h3{margin:0 0 8px}
+.card .amount{font-size:20px;font-weight:800;color:#065a50}
+.row{display:flex;gap:12px;align-items:center}
+.link{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:#065a50}
+.pie-wrapper, .bar-wrapper{margin-top:12px}
+.settings-list{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
+.settings-list a{padding:10px 12px;border-radius:8px;background:#fff;border:1px solid #ddd;text-decoration:none;color:#111}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Laboratory Dashboard</h1>
+    <div class="grid">
+        <div class="card">
+            <h3>Today's Collection</h3>
+            <div class="amount" id="todayAmt">₹ 0</div>
+            <a href="/laboratory/today_collection" class="link"><i class="fa fa-eye"></i> View Today's Transactions</a>
+        </div>
+        <div class="card">
+            <h3>This Month</h3>
+            <div class="amount" id="monthAmt">₹ 0</div>
+        </div>
+        <div class="card">
+            <h3>This Year</h3>
+            <div class="amount" id="yearAmt">₹ 0</div>
+        </div>
+    </div>
+
+    <div style="display:flex;gap:16px;margin-top:18px;flex-wrap:wrap">
+        <div class="card" style="flex:2">
+            <h3>Daily / Monthly Breakdown</h3>
+            <div class="bar-wrapper"><canvas id="monthChart" height="120"></canvas></div>
+        </div>
+        <div class="card" style="flex:1">
+            <h3>Department % (by tests)</h3>
+            <div class="pie-wrapper"><canvas id="deptChart" height="220"></canvas></div>
+            <div style="margin-top:8px;color:#64748b;font-size:13px">Total tests: <span id="totalTests">0</span></div>
+        </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+        <h3>Quick Settings</h3>
+        <div class="settings-list">
+            <a href="/lims_settings">LIMS Settings</a>
+            <a href="/hospital_master">Hospital Master</a>
+            <a href="/lab_settings">Lab Settings</a>
+            <a href="/system_settings">System Settings</a>
+            <a href="/admin/users">Admin - User Roles</a>
+        </div>
+    </div>
+
+</div>
+<script>
+async function loadData(){
+    const res = await fetch('/laboratory/dashboard/data');
+    const json = await res.json();
+    document.getElementById('todayAmt').textContent = '₹ ' + json.total_today.toFixed(2);
+    document.getElementById('monthAmt').textContent = '₹ ' + json.total_month.toFixed(2);
+    document.getElementById('yearAmt').textContent = '₹ ' + json.total_year.toFixed(2);
+    document.getElementById('totalTests').textContent = json.total_tests || 0;
+
+    const monthCtx = document.getElementById('monthChart').getContext('2d');
+    new Chart(monthCtx, {
+        type:'bar',
+        data:{labels: json.month_days.map(d=>d.toString()), datasets:[{label:'Lab Collection',data:json.month_amounts,backgroundColor:'#0f766e'}]},
+        options:{scales:{y:{beginAtZero:true}}}
+    });
+
+    const deptCtx = document.getElementById('deptChart').getContext('2d');
+    new Chart(deptCtx, {
+        type:'pie',
+        data:{labels: json.departments, datasets:[{data: json.dept_counts, backgroundColor:["#0f766e","#2dd4bf","#f59e0b","#ef4444","#60a5fa"]}]}
+    });
+}
+loadData();
+</script>
+</body>
+</html>
